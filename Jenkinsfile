@@ -77,5 +77,12 @@ pipeline {
                 }
             }
         }
+		stage('Verify Java & Maven') {
+    steps {
+        sh 'java -version'
+        sh 'mvn -version'
+    }
+}
+
     }
 }
