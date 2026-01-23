@@ -66,18 +66,18 @@ pipeline {
                             ]
                         ]
                     )
-                    stage('Verify Nexus Credentials') {
-    steps {
-        withCredentials([usernamePassword(
-            credentialsId: 'NEXUS_CREDENTIAL_ID',
-            usernameVariable: 'NEXUS_USER',
-            passwordVariable: 'NEXUS_PASS'
-        )]) {
-            sh 'echo "Nexus credentials loaded successfully"'
+                }
+            }
         }
-    }
-}
 
+        stage('Verify Nexus Credentials') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'NEXUS_CREDENTIAL_ID',
+                    usernameVariable: 'NEXUS_USER',
+                    passwordVariable: 'NEXUS_PASS'
+                )]) {
+                    sh 'echo "Nexus credentials loaded successfully"'
                 }
             }
         }
