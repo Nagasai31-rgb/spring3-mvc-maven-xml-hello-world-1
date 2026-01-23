@@ -6,14 +6,11 @@ pipeline {
     }
 
     environment {
-        // Nexus details
-        NEXUS_VERSION       = "nexus3"
-        NEXUS_PROTOCOL      = "http"
-        NEXUS_URL           = "18.206.185.79:8081"
-        NEXUS_REPOSITORY    = "devops"
-        NEXUS_CREDENTIAL_ID = "Nexus_server"
+        NEXUS_VERSION    = "nexus3"
+        NEXUS_PROTOCOL   = "http"
+        NEXUS_URL        = "18.206.185.79:8081"
+        NEXUS_REPOSITORY = "devops"
 
-        // Maven artifact details
         GROUP_ID    = "com.ncodeit"
         ARTIFACT_ID = "ncodeit-hello-world"
         VERSION     = "3.0"
@@ -34,23 +31,16 @@ pipeline {
             }
         }
 
-        stage("Publish Artifact to Nexus") {
+        stage("Publish Artifact to Nexus (NO AUTH)") {
             steps {
                 script {
                     def artifactPath = "target/${ARTIFACT_ID}-${VERSION}.${PACKAGING}"
-
-                    if (!fileExists(artifactPath)) {
-                        error "❌ Artifact not found: ${artifactPath}"
-                    }
-
-                    echo "🚀 Uploading ${artifactPath} to Nexus repository '${NEXUS_REPOSITORY}'"
 
                     nexusArtifactUploader(
                         nexusVersion: NEXUS_VERSION,
                         protocol: NEXUS_PROTOCOL,
                         nexusUrl: NEXUS_URL,
                         repository: NEXUS_REPOSITORY,
-                        credentialsId: NEXUS_CREDENTIAL_ID,
                         groupId: GROUP_ID,
                         version: VERSION,
                         artifacts: [
@@ -70,27 +60,6 @@ pipeline {
                     )
                 }
             }
-        }
-
-        stage("Verify Nexus Access (Optional)") {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: NEXUS_CREDENTIAL_ID,
-                    usernameVariable: 'NEXUS_USER',
-                    passwordVariable: 'NEXUS_PASS'
-                )]) {
-                    sh 'echo "✅ Nexus credentials loaded for user: $NEXUS_USER"'
-                }
-            }
-        }
-    }
-
-    post {
-        success {
-            echo "🎉 Build and Nexus deployment completed successfully!"
-        }
-        failure {
-            echo "❌ Build or Nexus deployment failed. Check logs above."
         }
     }
 }
