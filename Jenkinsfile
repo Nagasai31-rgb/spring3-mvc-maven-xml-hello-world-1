@@ -13,7 +13,8 @@ pipeline {
 
         GROUP_ID    = "com.ncodeit"
         ARTIFACT_ID = "ncodeit-hello-world"
-        VERSION     = "3.0"
+        VERSION = "3.0-SNAPSHOT"
+
         PACKAGING   = "war"
     }
 
