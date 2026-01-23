@@ -6,12 +6,14 @@ pipeline {
     }
 
     environment {
+        // Nexus details
         NEXUS_VERSION       = "nexus3"
         NEXUS_PROTOCOL      = "http"
-        NEXUS_URL = "http://18.206.185.79:8081"
+        NEXUS_URL           = "http://18.206.185.79:8081"
         NEXUS_REPOSITORY    = "devops"
         NEXUS_CREDENTIAL_ID = "Nexus_server"
 
+        // Maven artifact details
         GROUP_ID    = "com.ncodeit"
         ARTIFACT_ID = "ncodeit-hello-world"
         VERSION     = "3.0"
@@ -20,28 +22,28 @@ pipeline {
 
     stages {
 
-        stage("Clone Code") {
+        stage("Checkout Source") {
             steps {
                 git 'https://github.com/Nagasai31-rgb/spring3-mvc-maven-xml-hello-world-1.git'
             }
         }
 
-        stage("Maven Build") {
+        stage("Build with Maven") {
             steps {
                 sh 'mvn -Dmaven.test.failure.ignore=true clean install'
             }
         }
 
-        stage("Publish to Nexus") {
+        stage("Publish Artifact to Nexus") {
             steps {
                 script {
                     def artifactPath = "target/${ARTIFACT_ID}-${VERSION}.${PACKAGING}"
 
                     if (!fileExists(artifactPath)) {
-                        error "Artifact not found: ${artifactPath}"
+                        error "❌ Artifact not found: ${artifactPath}"
                     }
 
-                    echo "Uploading ${artifactPath} to Nexus"
+                    echo "🚀 Uploading ${artifactPath} to Nexus repository '${NEXUS_REPOSITORY}'"
 
                     nexusArtifactUploader(
                         nexusVersion: NEXUS_VERSION,
@@ -70,16 +72,25 @@ pipeline {
             }
         }
 
-        stage('Verify Nexus Credentials') {
+        stage("Verify Nexus Access (Optional)") {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: 'NEXUS_CREDENTIAL_ID',
+                    credentialsId: NEXUS_CREDENTIAL_ID,
                     usernameVariable: 'NEXUS_USER',
                     passwordVariable: 'NEXUS_PASS'
                 )]) {
-                    sh 'echo "Nexus credentials loaded successfully"'
+                    sh 'echo "✅ Nexus credentials loaded for user: $NEXUS_USER"'
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo "🎉 Build and Nexus deployment completed successfully!"
+        }
+        failure {
+            echo "❌ Build or Nexus deployment failed. Check logs above."
         }
     }
 }
