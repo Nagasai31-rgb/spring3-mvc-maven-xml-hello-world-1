@@ -13,8 +13,7 @@ pipeline {
 
         GROUP_ID    = "com.ncodeit"
         ARTIFACT_ID = "ncodeit-hello-world"
-        VERSION = "3.0-SNAPSHOT"
-
+        VERSION     = "3.0-SNAPSHOT"
         PACKAGING   = "war"
     }
 
@@ -22,13 +21,14 @@ pipeline {
 
         stage("Checkout Source") {
             steps {
-                git 'https://github.com/Nagasai31-rgb/spring3-mvc-maven-xml-hello-world-1.git'
+                git branch: 'master',
+                    url: 'https://github.com/Nagasai31-rgb/spring3-mvc-maven-xml-hello-world-1.git'
             }
         }
 
         stage("Build with Maven") {
             steps {
-                sh 'mvn -Dmaven.test.failure.ignore=true clean install'
+                sh 'mvn clean install -DskipTests'
             }
         }
 
@@ -36,6 +36,10 @@ pipeline {
             steps {
                 script {
                     def artifactPath = "target/${ARTIFACT_ID}-${VERSION}.${PACKAGING}"
+
+                    if (!fileExists(artifactPath)) {
+                        error "Artifact not found: ${artifactPath}"
+                    }
 
                     nexusArtifactUploader(
                         nexusVersion: NEXUS_VERSION,
